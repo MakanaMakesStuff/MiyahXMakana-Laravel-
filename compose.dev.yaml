@@ -71,13 +71,14 @@ services:
     networks:
       - laravel-development
     command: >
-      /bin/bash -c "
-      composer install && 
-      export NVM_DIR=\"$$HOME/.nvm\" && 
-      . \"$$NVM_DIR/nvm.sh\" && 
-      npm install && 
-      npm run dev -- --host
-      "
+        /bin/bash -c "
+        sudo chown -R www:www /var/www &&
+        composer install && 
+        export NVM_DIR=\"/home/www/.nvm\" && 
+        [ -s \"$$NVM_DIR/nvm.sh\" ] && . \"$$NVM_DIR/nvm.sh\" && 
+        npm install && 
+        npm run dev -- --host
+        "
 
   postgres:
     image: postgres:16

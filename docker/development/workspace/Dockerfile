@@ -61,6 +61,8 @@ RUN if getent group ${GID}; then \
     usermod -aG sudo www && \
     echo 'www ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
+RUN mkdir -p /var/www && chown -R www:www /var/www
+
 # Switch to the non-root user to install NVM and Node.js
 USER www
 
