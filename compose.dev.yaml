@@ -13,7 +13,6 @@ services:
       - NGINX_HOST=localhost
     networks:
       - laravel-development
-      - dokploy-network
     depends_on:
       php-fpm:
         condition: service_started  # Wait for php-fpm to start
@@ -70,15 +69,6 @@ services:
       - ./:/var/www
     networks:
       - laravel-development
-    command: >
-        /bin/bash -c "
-        sudo chown -R www:www /var/www &&
-        composer install && 
-        export NVM_DIR=\"/home/www/.nvm\" && 
-        [ -s \"$$NVM_DIR/nvm.sh\" ] && . \"$$NVM_DIR/nvm.sh\" && 
-        npm install && 
-        npm run dev -- --host
-        "
 
   postgres:
     image: postgres:16
