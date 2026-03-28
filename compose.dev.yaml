@@ -71,6 +71,14 @@ services:
     networks:
       - laravel-development
       - dokploy-network
+    command: >
+      /bin/bash -c "
+      composer install && 
+      export NVM_DIR=\"$$HOME/.nvm\" && 
+      . \"$$NVM_DIR/nvm.sh\" && 
+      npm install && 
+      npm run dev -- --host
+      "
 
   postgres:
     image: postgres:16

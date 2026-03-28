@@ -84,8 +84,4 @@ WORKDIR /var/www
 ENTRYPOINT []
 
 # Default command to keep the container running
-CMD composer install && \
-    export NVM_DIR="$HOME/.nvm" && \
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
-    npm install && \
-    npm run dev -- --host
+CMD ["bash"]
