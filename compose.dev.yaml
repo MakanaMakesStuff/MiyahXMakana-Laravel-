@@ -13,6 +13,7 @@ services:
       - NGINX_HOST=localhost
     networks:
       - laravel-development
+      - dokploy-network
     depends_on:
       php-fpm:
         condition: service_started  # Wait for php-fpm to start
@@ -83,7 +84,6 @@ services:
       - postgres-data-development:/var/lib/postgresql/data
     networks:
       - laravel-development
-      - dokploy-network
 
   redis:
     image: redis:alpine
