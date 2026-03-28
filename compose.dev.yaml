@@ -69,6 +69,8 @@ services:
       - ./:/var/www
     networks:
       - laravel-development
+    command: >
+      sh -c "composer install && npm install && npm run dev"
 
   postgres:
     image: postgres:16
