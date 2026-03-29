@@ -1,0 +1,53 @@
+services:
+  app:
+    container_name: mxm-app-prod
+    env_file:
+      - .env
+    build:
+      context: ../../
+      dockerfile: dokploy/production/Dockerfile.prod
+    volumes:
+      - storage_data:/var/www/storage
+      - public_assets:/var/www/shared_public
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    container_name: mxm-db-prod
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+    # Note: Port 5432 is NOT exposed to the host for security. 
+    # Only internal Docker networks can access it.
+    volumes:
+      - db_data_prod:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    container_name: mxm-nginx-prod
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - public_assets:/var/www/public:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+volumes:
+  db_data_prod:
+  storage_data:
+  public_assets:
+
+networks:
+  default:
+    name: dokploy-network
+    external: true

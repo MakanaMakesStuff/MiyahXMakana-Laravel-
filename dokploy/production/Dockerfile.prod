@@ -1,0 +1,71 @@
+# ==========================================
+# Stage 1: The Builder (PHP + Node + Composer)
+# ==========================================
+FROM php:8.3-cli AS builder
+
+# Install system dependencies, Node.js, and Composer
+RUN apt-get update && apt-get install -y curl zip unzip \
+	&& curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+	&& apt-get install -y nodejs \
+	&& apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app
+
+# 1. Install Composer dependencies (cache step)
+COPY composer.json composer.lock ./
+RUN composer install --no-interaction --prefer-dist --no-dev --ignore-platform-reqs --no-scripts --no-autoloader
+
+# 2. Copy the rest of the application
+COPY . .
+
+# 3. Generate autoloader so Laravel can boot up
+RUN composer dump-autoload --optimize
+
+# 4. Install Node dependencies and build assets
+# (Now Vite can successfully call `php artisan` during the build!)
+RUN npm ci
+RUN npm run build
+
+# ==========================================
+# Stage 2: Final Production Image
+# ==========================================
+FROM php:8.3-fpm
+
+# Install production system dependencies
+RUN apt-get update && apt-get install -y \
+	curl libpq-dev libonig-dev libzip-dev zip \
+	&& docker-php-ext-install pdo_mysql pdo_pgsql mbstring zip opcache \
+	&& apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Enable and configure OPcache for performance
+RUN echo "opcache.enable=1\n\
+	opcache.memory_consumption=256\n\
+	opcache.interned_strings_buffer=16\n\
+	opcache.max_accelerated_files=10000\n\
+	opcache.validate_timestamps=0\n\
+	opcache.save_comments=1" > /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
+
+WORKDIR /var/www
+
+# Copy the fully built application from the builder stage
+COPY --from=builder /app /var/www/
+
+# Create necessary directories and set permissions
+RUN mkdir -p /var/www/storage/framework/views \
+	/var/www/storage/framework/cache \
+	/var/www/storage/framework/sessions \
+	/var/www/storage/logs \
+	/var/www/bootstrap/cache \
+	/var/www/shared_public \
+	&& chown -R www-data:www-data /var/www \
+	&& chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Copy the entrypoint
+COPY --chmod=755 dokploy/production/entrypoint.prod.sh /usr/local/bin/entrypoint.sh
+
+# Use the www-data user for execution to increase security
+USER www-data
+
+ENTRYPOINT ["entrypoint.sh"]
