@@ -48,6 +48,7 @@ services:
     depends_on:
       app:
         condition: service_healthy
+        
 volumes:
   db_data:
 
