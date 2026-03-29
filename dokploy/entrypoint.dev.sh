@@ -13,7 +13,7 @@ until php artisan db:monitor > /dev/null 2>&1; do
   sleep 2
 done
 
-# Now run migrations
+# Now run migration
 echo "Running database migrations..."
 php artisan migrate --force
 
