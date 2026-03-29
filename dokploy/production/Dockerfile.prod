@@ -15,10 +15,18 @@ RUN npm run build
 # ==========================================
 FROM composer:latest AS vendor
 WORKDIR /app
+
+# 1. Copy ONLY the composer files first to cache this layer
 COPY composer.json composer.lock ./
-# Install only prod dependencies, optimize autoloader
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev --ignore-platform-reqs
+
+# 2. Install dependencies WITHOUT running scripts or optimizing autoloader yet
+RUN composer install --no-interaction --prefer-dist --no-dev --ignore-platform-reqs --no-scripts --no-autoloader
+
+# 3. NOW copy the rest of the application code (which includes the 'artisan' file!)
 COPY . .
+
+# 4. Generate the optimized autoloader and run scripts now that all files are present
+RUN composer dump-autoload --optimize
 
 # ==========================================
 # Stage 3: Final Production Image
