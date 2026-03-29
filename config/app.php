@@ -30,6 +30,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Allowed Emails
+    |--------------------------------------------------------------------------
+    |
+    | This value determines the emails that are allowed to access the chat app.
+    | It should be a comma-separated list of email addresses.
+    |
+    */
+    'allowed_emails' => env('ALLOWED_EMAILS', ''),
+    /*
+
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

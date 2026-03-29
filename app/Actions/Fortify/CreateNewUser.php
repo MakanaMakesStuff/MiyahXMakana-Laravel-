@@ -21,6 +21,21 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             ...$this->profileRules(),
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users',
+                function ($attribute, $value, $fail) {
+                    // Pull from config (which pulls from .env)
+                    $allowed = array_map('trim', explode(',', config('app.allowed_emails')));
+                    
+                    if (! in_array($value, $allowed)) {
+                        $fail('This email is not authorized to register an account.');
+                    }
+                },
+            ],
             'password' => $this->passwordRules(),
         ])->validate();
 
