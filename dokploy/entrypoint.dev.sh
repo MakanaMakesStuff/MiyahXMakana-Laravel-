@@ -4,6 +4,7 @@ set -e  # Exit immediately if a command fails
 # Optional: Install deps if they are missing
 if [ ! -d "vendor" ]; then 
     echo "Installing composer dependencies..."
+    # Using --no-dev is best practice for staging/prod, but you can leave it off if you need dev tools
     composer install --no-interaction --quiet
 fi
 
@@ -13,19 +14,23 @@ until php artisan db:monitor > /dev/null 2>&1; do
   sleep 2
 done
 
-# Now run migration
+# Now run migrations
 echo "Running database migrations..."
 php artisan migrate --force
 
-# install npm dependencies if node_modules is missing
+# Install npm dependencies
 if [ ! -d "node_modules" ]; then 
-	echo "Installing npm dependencies..."
-	npm install --silent
+    echo "Installing npm dependencies..."
+    npm install --silent
 fi
 
-# Start Vite in the background
-echo "Starting Vite..."
-npm run dev & 
+# 🚨 THE FIX: Build the assets instead of running the dev server
+echo "Building Vite assets..."
+npm run build
+
+# Optional but recommended for staging: Cache Laravel's config and routes for speed
+echo "Caching configuration..."
+php artisan optimize
 
 # Start PHP-FPM in the foreground
 echo "Starting PHP-FPM..."

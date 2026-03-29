@@ -37,6 +37,8 @@ RUN mkdir -p /var/www/storage /var/www/bootstrap/cache && \
 	chown -R root:root /var/www; \
 	fi
 
+RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
 # 8. Set the execution user dynamically
 USER ${USER_ID}
 
