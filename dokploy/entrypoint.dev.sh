@@ -7,7 +7,13 @@ if [ ! -d "vendor" ]; then
     composer install --no-interaction --quiet
 fi
 
-# run artisan migration
+echo "Waiting for database..."
+until php artisan db:monitor > /dev/null 2>&1; do
+  echo "Database is unavailable - sleeping"
+  sleep 2
+done
+
+# Now run migrations
 echo "Running database migrations..."
 php artisan migrate --force
 

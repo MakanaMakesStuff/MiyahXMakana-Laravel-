@@ -1,6 +1,8 @@
 services:
   app:
     container_name: mxm-app-dev
+    env_file:
+      - .env
     build:
       context: ..
       dockerfile: dokploy/Dockerfile.dev
@@ -9,8 +11,6 @@ services:
         - GROUP_ID=${GID:-1000}
     volumes:
       - ../:/var/www
-    environment:
-      - APP_ENV=local
     ports:
       - "5173:5173" # THE VITE PORT
     depends_on:

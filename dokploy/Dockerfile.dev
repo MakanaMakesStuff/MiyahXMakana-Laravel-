@@ -6,7 +6,7 @@ ARG GROUP_ID=33
 ARG NODE_VERSION=20.x
 
 # 2. Synchronize the www-data user ONLY if not root and not already 33
-RUN if [ "${USER_ID}" -ne 33 ] && [ "${USER_ID}" -ne 0 ] && [ "${USER_ID}" -ne 1000 ]; then \
+RUN if [ "${USER_ID}" -ne 33 ] && [ "${USER_ID}" -ne 0 ]; then \
 	usermod -u ${USER_ID} www-data && \
 	groupmod -g ${GROUP_ID} www-data; \
 	fi
@@ -31,7 +31,7 @@ WORKDIR /var/www
 # 7. Setup Directory & Permissions
 # Fixed the logic to ensure directories exist and ownership is correct
 RUN mkdir -p /var/www/storage /var/www/bootstrap/cache && \
-	if [ "${USER_ID}" -ne 33 ] && [ "${USER_ID}" -ne 0 ] && [ "${USER_ID}" -ne 1000 ]; then \
+	if [ "${USER_ID}" -ne 33 ] && [ "${USER_ID}" -ne 0 ]; then \
 	chown -R www-data:www-data /var/www; \
 	else \
 	chown -R root:root /var/www; \
