@@ -1,50 +1,38 @@
-# Stage 1: Build Frontend Assets
-FROM node:20 AS frontend
+# STAGE 1: Build the Backend (Composer)
+FROM composer:latest AS backend-builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --optimize-autoloader --no-interaction --prefer-dist --ignore-platform-reqs
+
+# STAGE 2: Build the Frontend (Needs Node + PHP for Wayfinder)
+FROM php:8.3-cli AS frontend-builder
+WORKDIR /app
+RUN apt-get update && apt-get install -y curl unzip libpq-dev libonig-dev libzip-dev \
+	&& docker-php-ext-install pdo_mysql pdo_pgsql mbstring zip \
+	&& curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+	&& apt-get install -y nodejs
 COPY . .
-RUN npm run build
+COPY --from=backend-builder /app/vendor ./vendor
+# Dummy environment for Artisan boot during build
+RUN rm -f bootstrap/cache/*.php && mkdir -p database && touch database/database.sqlite \
+	&& echo "APP_ENV=production\nAPP_KEY=\nDB_CONNECTION=sqlite\nDB_DATABASE=/app/database/database.sqlite" > .env \
+	&& php artisan key:generate
+RUN npm ci && npm run build
 
-# Stage 2: Build PHP App
+# STAGE 3: Final Production Image
 FROM php:8.3-fpm
-
-# 1. Define ARGs with defaults
-ARG USER_ID=33
-ARG GROUP_ID=33
-ARG NODE_VERSION=20.x
-
-# 2. Synchronize the www-data user ONLY if not root and not already 33
-RUN if [ "${USER_ID}" -ne 33 ] && [ "${USER_ID}" -ne 0 ] && [ "${USER_ID}" -ne 1000 ]; then \
-	usermod -u ${USER_ID} www-data && \
-	groupmod -g ${GROUP_ID} www-data; \
-	fi
-
-# Install only required prod dependencies (No Xdebug)
-RUN apt-get update && apt-get install -y \
-	unzip libpq-dev libonig-dev libzip-dev \
+RUN apt-get update && apt-get install -y unzip libpq-dev libonig-dev libzip-dev \
 	&& docker-php-ext-install pdo_mysql pdo_pgsql mbstring zip \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
 WORKDIR /var/www
-
-# Copy the actual application code into the image
-COPY . .
-
-# Copy the compiled frontend assets from Stage 1
-COPY --from=frontend /app/public/build ./public/build
-
-# Install PHP dependencies optimized for production
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Fix permissions so the web server can read/write
-RUN if [ "${USER_ID}" -ne 33 ] && [ "${USER_ID}" -ne 0 ] && [ "${USER_ID}" -ne 1000 ]; then \
-	chown -R www-data:www-data /var/www; \
-	fi
-
-USER ${USER_ID}
-
-CMD ["php-fpm"]
+# IMPORTANT: Copy code THEN overwrite with clean vendor/build
+COPY . . 
+COPY --from=backend-builder /app/vendor ./vendor
+COPY --from=frontend-builder /app/public/build ./public/build
+# Clean up any local dev files
+RUN rm -f .env bootstrap/cache/*.php
+RUN mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions storage/logs bootstrap/cache \
+	&& chown -R www-data:www-data /var/www && chmod -R 775 storage bootstrap/cache
+COPY --chmod=755 dokploy/entrypoint.prod.sh /usr/local/bin/entrypoint.sh
+USER www-data
+ENTRYPOINT ["entrypoint.sh"]

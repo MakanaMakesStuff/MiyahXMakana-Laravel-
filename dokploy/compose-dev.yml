@@ -26,15 +26,15 @@ services:
     container_name: mxm-db-dev
     image: postgres:latest
     environment:
-      - POSTGRES_USER=dev
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=mxm_dev
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev -d mxm_dev"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
       interval: 10s
       timeout: 5s
       retries: 5
