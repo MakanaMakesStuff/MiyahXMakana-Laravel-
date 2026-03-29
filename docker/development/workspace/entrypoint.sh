@@ -15,7 +15,5 @@ fi
 echo "Starting npm dev server..."
 npm run dev &
 
-
-
 # Execute the CMD passed to container (default: bash)
 exec "$@"
