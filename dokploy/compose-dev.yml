@@ -11,8 +11,6 @@ services:
         - GROUP_ID=${GID:-1000}
     volumes:
       - ../:/var/www
-    ports:
-      - "5173:5173" # THE VITE PORT
     depends_on:
       db:
         condition: service_healthy
