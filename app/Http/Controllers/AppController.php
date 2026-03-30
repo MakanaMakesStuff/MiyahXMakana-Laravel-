@@ -27,7 +27,7 @@ class AppController extends Controller
             ->reverse()
             ->values();
 
-        return Inertia::render('app', [
+        return Inertia::render('chat', [
             'messages' => $messages,
         ]);
     }

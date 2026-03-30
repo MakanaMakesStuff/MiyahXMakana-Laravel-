@@ -98,6 +98,10 @@ export default function App({
 
     // 1. Listen for new messages on the private channel
     useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
         if (window.Echo) {
             window.Echo.join('our-space')
                 .here((users: any) => {
@@ -151,7 +155,7 @@ export default function App({
                 window.Echo.leave('our-space');
             }
         };
-    }, []);
+    }, [auth.user.id]);
 
     // 2. Auto-scroll to bottom whenever messages change
     useEffect(() => {
@@ -189,7 +193,7 @@ export default function App({
         reset('body');
 
         // Send to the server in the background
-        post('/app/messages', {
+        post('/chat/messages', {
             data: { body: currentBody },
             preserveScroll: true,
             preserveState: true,

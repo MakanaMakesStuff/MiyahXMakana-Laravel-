@@ -7,7 +7,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import AppFrontendLayout from './layouts/app/app-frontend-layout';
 import './bootstrap';
-import AppMessengerLayout from './layouts/app/app-messenger-layout';
+import ChatMessengerLayout from './layouts/app/app-messenger-layout';
 
 configureEcho({
     broadcaster: 'reverb',
@@ -27,8 +27,8 @@ createInertiaApp({
         switch (true) {
             case ['home'].includes(name):
                 return AppFrontendLayout;
-            case ['app'].includes(name):
-                return AppMessengerLayout;
+            case ['chat'].includes(name):
+                return ChatMessengerLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):

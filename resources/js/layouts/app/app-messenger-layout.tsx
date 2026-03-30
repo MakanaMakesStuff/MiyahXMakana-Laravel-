@@ -1,5 +1,5 @@
 import type { AppLayoutProps } from '@/types';
 
-export default function AppMessengerLayout({ children }: AppLayoutProps) {
+export default function ChatMessengerLayout({ children }: AppLayoutProps) {
     return <>{children}</>;
 }

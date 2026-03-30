@@ -24,8 +24,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
         
     // The Chat App Routes
-    Route::get('/app', [AppController::class, 'index'])->name('app.index');
-    Route::post('/app/messages', [AppController::class, 'store'])->name('app.store');
+    Route::get('/chat', [AppController::class, 'index'])->name('chat.index');
+    Route::post('/chat/messages', [AppController::class, 'store'])->name('chat.store');
 });
 
 require __DIR__.'/settings.php';
