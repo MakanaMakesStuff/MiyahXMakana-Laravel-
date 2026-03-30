@@ -34,7 +34,7 @@ export default function AppFrontendLayout({ children }: AppLayoutProps) {
                             </span>
                             {/* Assuming you want an "Enter App" button when logged in */}
                             <Link
-                                href="/app"
+                                href="/chat"
                                 className="rounded-lg bg-gray-950 px-4 py-2 text-sm font-medium text-white shadow-sm transition duration-150 hover:bg-gray-800"
                             >
                                 Open App

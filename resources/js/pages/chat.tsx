@@ -198,7 +198,7 @@ export default function App({
     const partnerName = auth.user.name?.includes('Makana') ? 'Miyah' : 'Makana';
 
     return (
-        <div className="mx-auto flex h-full w-full flex-col border-x border-gray-100 bg-white shadow-sm">
+        <>
             <Head title="Our Space | M&M" />
 
             {/* --- HEADER --- */}
@@ -233,6 +233,13 @@ export default function App({
                     <span className="hidden text-sm text-gray-500 md:inline">
                         Welcome, {auth.user.name}
                     </span>
+
+                    <Link
+                        href="/"
+                        className="cursor-pointer rounded-lg bg-gray-950 px-4 py-2 text-sm font-medium text-white shadow-sm transition duration-150 hover:bg-gray-800"
+                    >
+                        Home
+                    </Link>
 
                     <Link
                         href={logout()}
@@ -322,6 +329,6 @@ export default function App({
                     </svg>
                 </button>
             </form>
-        </div>
+        </>
     );
 }

@@ -33,7 +33,7 @@ export default function Welcome() {
 
                 <div className="flex flex-col items-center gap-4 sm:flex-row">
                     <Link
-                        href="/app"
+                        href="/chat"
                         className="w-full rounded-xl bg-gray-950 px-8 py-3.5 text-base font-semibold text-white shadow-md transition duration-150 hover:bg-gray-800 sm:w-auto"
                     >
                         Launch Web App
