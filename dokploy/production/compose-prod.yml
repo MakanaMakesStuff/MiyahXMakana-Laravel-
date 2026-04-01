@@ -1,4 +1,19 @@
 services:
+  worker:
+      container_name: mxm-worker-prod
+      restart: unless-stopped
+      env_file:
+        - .env
+      build:
+        context: ../../
+        dockerfile: dokploy/production/Dockerfile.prod
+      # This is the magic part: it overrides the default CMD to start the worker
+      command: php artisan queue:work --tries=3 --timeout=90
+      volumes:
+        - storage_data:/var/www/storage
+      depends_on:
+        db:
+          condition: service_healthy
   app:
     container_name: mxm-app-prod
     env_file:

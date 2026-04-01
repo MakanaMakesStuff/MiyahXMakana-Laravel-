@@ -31,7 +31,12 @@ class MessageController extends Controller
         $partner = User::where('id', '!=', auth()->id())->first();
         
         if ($partner) {
-            $partner->notify(new MessageSentNotification($message));
+            try {
+                $partner->notify(new MessageSentNotification($message));
+            } catch (\Exception $e) {
+                // This will write the exact error to storage/logs/laravel.log
+                \Log::error('Push Notification Failed: ' . $e->getMessage());
+            }
         }
 
         return back(); // Inertia will refresh the page props automatically
